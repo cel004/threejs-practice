@@ -1,9 +1,8 @@
-import 'style.css';
-import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { AsciiEffect } from 'three/examples/jsm/effects/AsciiEffect.js';
-import html2canvas from 'html2canvas';
+// imports the three.js library
+import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
+import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
+// allows imports of .gltf files
+import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
 let lightMode = true;
 const asciiMesh = new THREE.Mesh();
@@ -66,39 +65,81 @@ stlLoader.load(
         asciiMesh.geometry.center();
         asciiMesh.rotation.x = -Math.PI / 2; // upright rotation
 
-        // bounding box adjustment
-        asciiMesh.geometry.computeBoundingBox();
-        const bbox = asciiMesh.geometry.boundingBox;
+// intialize scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x000000); // bg colour
 
-        asciiMesh.position.y = (bbox.max.z - bbox.min.z) / 2;
-        scene.add(asciiMesh);
+// camera
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.set(0, 1, 5); 
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // soft white light
+scene.add(ambientLight);
+
+// directional lighting
+const lightFront = new THREE.DirectionalLight(0xffffff, 0.5); 
+// (x ,y ,z)
+lightFront.position.set(0, 5, 10); 
+scene.add(lightFront);
+const lightBack = new THREE.DirectionalLight(0xffffff, 0.5); 
+lightBack.position.set(0, 5, -10);
+scene.add(lightBack);
+
+const lightRight = new THREE.DirectionalLight(0xffffff, 0.5); 
+lightRight.position.set(5, 5, 0);
+scene.add(lightRight);
+const lightLeft = new THREE.DirectionalLight(0xffffff, 0.5); 
+lightLeft.position.set(-5, 5, 0);
+scene.add(lightLeft);
+
+// keep 3d object on global variable (able to access later)
+let object;
+const loader = new GLTFLoader();
+loader.load(
+    `assets/ChocoCat.glb`,
+    function(gltf){
+        // if file is loaded, add to scene
+        object = gltf.scene;
+        scene.add(object);
     },
-    // for debugging
-    undefined,
-    function (error) {
-        console.error('Error loading GLTB file:', error);
+    function(xhr){
+        // while loaded, log progress
+        console.log(`Loaded: ${xhr.loaded} bytes / ${xhr.total} bytes`);
+    },
+    function(error){
+        // if theres an error, log it
+        console.error(error);
     }
 );
 
-// orbit Controls w/ mouse
-const controls = new OrbitControls(camera, effect.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true}); 
+renderer.setSize(window.innerWidth, window.innerHeight);
 
-// resizing listener
+// add renderer to DOM
+document.getElementById("ChocoCat").appendChild(renderer.domElement);
+
+// orbit controls for rotation w/ mouse
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; // damping for smoother controls
+controls.dampingFactor = 0.25; // factor for smoother controls
+controls.enableZoom = false; // disables zoom 
+controls.enablePan = false; // disables panning
+controls.maxPolarAngle = Math.PI; // allows full vertical rotation
+controls.target.set(0, 0, 0); // target the center of the scene
+controls.update(); // update rotation
+
+// resize listener
 window.addEventListener('resize', () => {
-    sizes.width = window.innerWidth;
-    sizes.height = window.innerHeight;
-    camera.aspect = sizes.width / sizes.height;
+    camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    effect.setSize(sizes.width, sizes.height);
+    renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// animation
+// animation loop
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // Update controls for smooth interaction
-    effect.render(scene, camera); // Render scene with ASCII effect
+    controls.update(); // update controls
+    renderer.render(scene, camera); // render scene
 }
 
 animate();
