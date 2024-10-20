@@ -61,7 +61,7 @@ document.getElementById("ChocoCat").appendChild(renderer.domElement);
 // orbit controls for rotation w/ mouse
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // damping for smoother controls
-controls.dampingFactor = 0.25; // factor for smoother controls
+controls.dampingFactor = 0.05; // factor for smoother controls
 controls.enableZoom = false; // disables zoom 
 controls.enablePan = false; // disables panning
 controls.maxPolarAngle = Math.PI; // allows full vertical rotation
