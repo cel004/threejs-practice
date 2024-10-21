@@ -4,6 +4,9 @@ import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/js
 // allows imports of .gltf files
 import { GLTFLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/GLTFLoader.js";
 
+window.addEventListener('load', () => {
+    document.body.classList.add('fade-in'); // fade in after loading
+});
 
 // intialize scene
 const scene = new THREE.Scene();
@@ -19,10 +22,10 @@ scene.add(ambientLight);
 // directional lighting
 const lightFront = new THREE.DirectionalLight(0xffffff, 0.5); 
 // (x ,y ,z)
-lightFront.position.set(0, 5, 10); 
+lightFront.position.set(0, 2, 10); 
 scene.add(lightFront);
 const lightBack = new THREE.DirectionalLight(0xffffff, 0.5); 
-lightBack.position.set(0, 5, -10);
+lightBack.position.set(0, 2, -10);
 scene.add(lightBack);
 
 const lightRight = new THREE.DirectionalLight(0xffffff, 0.5); 
@@ -34,12 +37,14 @@ scene.add(lightLeft);
 
 // keep 3d object on global variable (able to access later)
 let object;
+let originalPosition;
 const loader = new GLTFLoader();
 loader.load(
     `assets/ChocoCat.glb`,
     function(gltf){
         // if file is loaded, add to scene
         object = gltf.scene;
+        originalPosition = object.position.clone(); // store original position
         scene.add(object);
     },
     function(xhr){
@@ -54,7 +59,6 @@ loader.load(
 
 const renderer = new THREE.WebGLRenderer({alpha: true, antialias: true}); 
 renderer.setSize(window.innerWidth, window.innerHeight);
-
 // add renderer to DOM
 document.getElementById("ChocoCat").appendChild(renderer.domElement);
 
@@ -62,9 +66,15 @@ document.getElementById("ChocoCat").appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // damping for smoother controls
 controls.dampingFactor = 0.05; // factor for smoother controls
+
 controls.enableZoom = false; // disables zoom 
 controls.enablePan = false; // disables panning
-controls.maxPolarAngle = Math.PI; // allows full vertical rotation
+
+// disallows rotation on Z axis
+controls.minPolarAngle = Math.PI / 2;
+controls.maxPolarAngle = Math.PI / 2; 
+
+
 controls.target.set(0, 0, 0); // target the center of the scene
 controls.update(); // update rotation
 
@@ -83,12 +93,8 @@ function animate() {
 
     if (object) {
         // rotates object around the x axis
-        object.rotation.y += 0.001; // speed rotation
+        object.rotation.y += 0.002; // speed rotation
     }
 }
 
 animate();
-
-window.addEventListener('load', () => {
-    document.body.classList.add('fade-in'); // fade in after loading
-});
