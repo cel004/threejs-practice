@@ -80,6 +80,15 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update(); // update controls
     renderer.render(scene, camera); // render scene
+
+    if (object) {
+        // rotates object around the x axis
+        object.rotation.y += 0.001; // speed rotation
+    }
 }
 
 animate();
+
+window.addEventListener('load', () => {
+    document.body.classList.add('fade-in'); // fade in after loading
+});
