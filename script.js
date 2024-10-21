@@ -14,7 +14,7 @@ scene.background = new THREE.Color(0x000000); // bg colour
 
 // camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1, 5); 
+camera.position.set(0, 1, 5.5); 
 
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); // soft white light
 scene.add(ambientLight);
@@ -93,7 +93,7 @@ function animate() {
 
     if (object) {
         // rotates object around the x axis
-        object.rotation.y += 0.002; // speed rotation
+        object.rotation.y += 0.001; // speed rotation
     }
 }
 
